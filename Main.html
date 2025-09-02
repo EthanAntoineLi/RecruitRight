@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Analyzer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #327bf0;
+            margin-bottom: 10px;
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            color: #666;
+        }
+        
+        /* Step indicator */
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 20px;
+            position: relative;
+        }
+        
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #ddd;
+            color: #666;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+            z-index: 2;
+        }
+        
+        .step.active .step-number {
+            background-color: #327bf0;
+            color: white;
+        }
+        
+        .step.completed .step-number {
+            background-color: #c732f0;
+            color: white;
+        }
+        
+        .step-text {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .step.active .step-text {
+            color: #327bf0;
+            font-weight: bold;
+        }
+        
+        .step.completed .step-text {
+            color: #c732f0;
+        }
+        
+        .step-indicator .step:not(:last-child):after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 70px;
+            width: 60px;
+            height: 2px;
+            background-color: #ddd;
+            z-index: 1;
+        }
+        
+        /* Page sections */
+        .page-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .page-section.active {
+            display: block;
+        }
+        
+        /* Upload page */
+        .upload-section {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .upload-box {
+            border: 3px dashed #327bf0;
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            background-color: rgba(50, 123, 240, 0.05);
+        }
+        
+        .upload-box:hover {
+            background-color: rgba(50, 123, 240, 0.1);
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            color: #327bf0;
+            margin-bottom: 15px;
+        }
+        
+        .upload-text {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .upload-subtext {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        #file-input {
+            display: none;
+        }
+        
+        .action-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #327bf0;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+        }
+        
+        .action-btn:hover {
+            background-color: #2861c7;
+        }
+        
+        .action-btn:disabled {
+            background-color: #9bbef7;
+            cursor: not-allowed;
+        }
+        
+        .selected-files {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            margin-bottom: 8px;
+        }
+        
+        .file-name {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-right: 10px;
+        }
+        
+        .remove-btn {
+            color: #ff4d4d;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+        }
+        
+        /* Loading page */
+        .loading-section {
+            background: white;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .loading-icon {
+            font-size: 4rem;
+            color: #327bf0;
+            margin-bottom: 20px;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin: 30px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #c732f0;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .loading-text {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .percentage {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #327bf0;
+        }
+        
+        /* Results page */
+        .results-section {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .results-title {
+            font-size: 1.8rem;
+            color: #327bf0;
+            margin-bottom: 20px;
+        }
+        
+        .candidate-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .candidate-img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #327bf0;
+            margin-bottom: 20px;
+        }
+        
+        .candidate-name {
+            font-size: 2rem;
+            color: #327bf0;
+            margin-bottom: 10px;
+        }
+        
+        .candidate-title {
+            font-size: 1.3rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .candidate-match {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #c732f0;
+            color: white;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            font-size: 1.2rem;
+        }
+        
+        .candidate-details {
+            background-color: #f9f9f9;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: left;
+            margin-top: 20px;
+            width: 100%;
+        }
+        
+        .detail-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .detail-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            color: #327bf0;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .restart-btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background-color: #327bf0;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 30px;
+        }
+        
+        .restart-btn:hover {
+            background-color: #2861c7;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 30px;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .step-indicator .step:not(:last-child):after {
+                width: 30px;
+                left: 55px;
+            }
+            
+            .upload-section, .loading-section, .results-section {
+                padding: 20px;
+            }
+            
+            .candidate-details {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">Candidate Analyzer</div>
+            <div class="tagline">Find the perfect candidate who matches your company's values</div>
+        </header>
+        
+        <!-- Step Indicator -->
+        <div class="step-indicator">
+            <div class="step active" id="step1">
+                <div class="step-number">1</div>
+                <div class="step-text">Upload CVs</div>
+            </div>
+            <div class="step" id="step2">
+                <div class="step-number">2</div>
+                <div class="step-text">Analysis</div>
+            </div>
+            <div class="step" id="step3">
+                <div class="step-number">3</div>
+                <div class="step-text">Results</div>
+            </div>
+        </div>
+        
+        <!-- Upload Page -->
+        <div class="page-section active" id="upload-page">
+            <section class="upload-section">
+                <h2 class="section-title">Upload Candidate CVs</h2>
+                
+                <div class="upload-box" id="upload-area">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <div class="upload-text">Drag & Drop to Upload</div>
+                    <div class="upload-subtext">or</div>
+                    <button class="action-btn" onclick="document.getElementById('file-input').click()">Choose Files</button>
+                    <input type="file" id="file-input" multiple accept=".pdf,.doc,.docx">
+                </div>
+                
+                <button class="action-btn" id="analyze-button" disabled>Analyze Candidates</button>
+                
+                <div class="selected-files" id="files-container">
+                    <!-- Files will be listed here -->
+                </div>
+            </section>
+        </div>
+        
+        <!-- Loading Page -->
+        <div class="page-section" id="loading-page">
+            <section class="loading-section">
+                <div class="loading-icon">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <h2>Analyzing Candidates...</h2>
+                <p class="loading-text">We're comparing CVs to find the best cultural fit for your company</p>
+                
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                
+                <div class="percentage" id="percentage">0%</div>
+            </section>
+        </div>
+        
+        <!-- Results Page -->
+        <div class="page-section" id="results-page">
+            <section class="results-section">
+                <h2 class="results-title">Best Candidate Match</h2>
+                
+                <div class="candidate-display">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80" alt="Candidate" class="candidate-img">
+                    <h3 class="candidate-name">Michael Johnson</h3>
+                    <p class="candidate-title">Senior Software Engineer</p>
+                    <div class="candidate-match">92% Match</div>
+                    
+                    <div class="candidate-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Strengths:</span> 
+                            Leadership, Technical Skills, Creativity, Problem Solving
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Experience:</span> 
+                            8 years in software development with focus on web technologies
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Education:</span> 
+                            Master's in Computer Science from Stanford University
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Values Alignment:</span> 
+                            Excellent cultural fit with emphasis on innovation and teamwork
+                        </div>
+                    </div>
+                    
+                    <button class="restart-btn" onclick="restartProcess()">
+                        <i class="fas fa-redo"></i> Analyze More Candidates
+                    </button>
+                </div>
+            </section>
+        </div>
+        
+        <footer>
+            <p>Candidate Analyzer Prototype © 2023 | For demonstration purposes only</p>
+        </footer>
+    </div>
+
+    <script>
+        // DOM elements
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        const analyzeButton = document.getElementById('analyze-button');
+        const filesContainer = document.getElementById('files-container');
+        const progressBar = document.getElementById('progress-bar');
+        const percentageText = document.getElementById('percentage');
+        
+        // Page sections
+        const uploadPage = document.getElementById('upload-page');
+        const loadingPage = document.getElementById('loading-page');
+        const resultsPage = document.getElementById('results-page');
+        
+        // Step indicators
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const step3 = document.getElementById('step3');
+        
+        // Store selected files
+        let selectedFiles = [];
+        
+        // Initialize the page
+        function init() {
+            // Drag and drop functionality
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#c732f0';
+                uploadArea.style.backgroundColor = 'rgba(199, 50, 240, 0.1)';
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.borderColor = '#327bf0';
+                uploadArea.style.backgroundColor = 'rgba(50, 123, 240, 0.05)';
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#327bf0';
+                uploadArea.style.backgroundColor = 'rgba(50, 123, 240, 0.05)';
+                
+                // Get the dropped files
+                const files = e.dataTransfer.files;
+                handleFiles(files);
+            });
+            
+            // File input change event
+            fileInput.addEventListener('change', () => {
+                handleFiles(fileInput.files);
+            });
+            
+            // Analyze button click event
+            analyzeButton.addEventListener('click', startAnalysis);
+        }
+        
+        // Handle the selected files
+        function handleFiles(files) {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                
+                // Only add if not already in the list
+                if (!selectedFiles.some(f => f.name === file.name)) {
+                    selectedFiles.push(file);
+                    
+                    // Create file item
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    fileItem.innerHTML = `
+                        <div class="file-name">${file.name}</div>
+                        <button class="remove-btn" data-name="${file.name}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    
+                    filesContainer.appendChild(fileItem);
+                    
+                    // Add event listener to remove button
+                    const removeBtn = fileItem.querySelector('.remove-btn');
+                    removeBtn.addEventListener('click', () => {
+                        removeFile(file.name);
+                        fileItem.remove();
+                    });
+                }
+            }
+            
+            // Enable analyze button if we have files
+            analyzeButton.disabled = selectedFiles.length === 0;
+        }
+        
+        // Remove a file from the selection
+        function removeFile(fileName) {
+            selectedFiles = selectedFiles.filter(file => file.name !== fileName);
+            analyzeButton.disabled = selectedFiles.length === 0;
+        }
+        
+        // Start the analysis process
+        function startAnalysis() {
+            // Switch to loading page
+            uploadPage.classList.remove('active');
+            loadingPage.classList.add('active');
+            
+            // Update step indicator
+            step1.classList.remove('active');
+            step1.classList.add('completed');
+            step2.classList.add('active');
+            
+            // Simulate analysis progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 5;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    
+                    // After progress completes, show results
+                    setTimeout(showResults, 500);
+                }
+                
+                // Update progress bar
+                progressBar.style.width = `${progress}%`;
+                percentageText.textContent = `${Math.round(progress)}%`;
+            }, 200);
+        }
+        
+        // Show the results page
+        function showResults() {
+            // Switch to results page
+            loadingPage.classList.remove('active');
+            resultsPage.classList.add('active');
+            
+            // Update step indicator
+            step2.classList.remove('active');
+            step2.classList.add('completed');
+            step3.classList.add('active');
+        }
+        
+        // Restart the process
+        function restartProcess() {
+            // Reset to upload page
+            resultsPage.classList.remove('active');
+            uploadPage.classList.add('active');
+            
+            // Reset step indicator
+            step3.classList.remove('active');
+            step2.classList.remove('completed');
+            step1.classList.remove('completed');
+            step1.classList.add('active');
+            
+            // Clear files
+            selectedFiles = [];
+            filesContainer.innerHTML = '';
+            analyzeButton.disabled = true;
+            
+            // Reset progress
+            progressBar.style.width = '0%';
+            percentageText.textContent = '0%';
+        }
+        
+        // Initialize the application
+        init();
+    </script>
+</body>
+</html>

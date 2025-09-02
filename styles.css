@@ -1,0 +1,184 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f4f4f4;
+    color: #333;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    flex: 1;
+}
+
+header {
+    text-align: center;
+    padding: 20px 0;
+    margin-bottom: 30px;
+}
+
+.logo {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #327bf0;
+    margin-bottom: 10px;
+}
+
+.tagline {
+    font-size: 1.2rem;
+    color: #666;
+}
+
+/* Step indicator */
+.step-indicator {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 20px;
+    position: relative;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #ddd;
+    color: #666;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+    z-index: 2;
+}
+
+.step.active .step-number {
+    background-color: #327bf0;
+    color: white;
+}
+
+.step.completed .step-number {
+    background-color: #c732f0;
+    color: white;
+}
+
+.step-text {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.step.active .step-text {
+    color: #327bf0;
+    font-weight: bold;
+}
+
+.step.completed .step-text {
+    color: #c732f0;
+}
+
+.step-indicator .step:not(:last-child):after {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 70px;
+    width: 60px;
+    height: 2px;
+    background-color: #ddd;
+    z-index: 1;
+}
+
+/* Page sections */
+.page-section {
+    display: none;
+    animation: fadeIn 0.5s ease;
+}
+
+.page-section.active {
+    display: block;
+}
+
+/* Upload page */
+.upload-section {
+    background: white;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.upload-box {
+    border: 3px dashed #327bf0;
+    border-radius: 8px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+    background-color: rgba(50, 123, 240, 0.05);
+}
+
+.upload-box:hover {
+    background-color: rgba(50, 123, 240, 0.1);
+}
+
+.upload-icon {
+    font-size: 3rem;
+    color: #327bf0;
+    margin-bottom: 15px;
+}
+
+.upload-text {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+.upload-subtext {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+#file-input {
+    display: none;
+}
+
+.action-btn {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    background-color: #327bf0;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 20px;
+}
+
+.action-btn:hover {
+    background-color: #2861c7;
+}
+
+.action-btn:disabled {
+    background-color: #9bbef7;
+    cursor: not-allowed;
+}
+
+/* Add the rest of the CSS here */
